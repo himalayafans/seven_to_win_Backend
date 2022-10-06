@@ -38,6 +38,7 @@ namespace SevenToWinBackend.Library.Services
                 return;
             }
             FileInfo file = await fileService.DownloadFile(url);
+            var text = imageService.Ocr(file);
             await message.ReplyAsync(file.FullName);
         }
     }

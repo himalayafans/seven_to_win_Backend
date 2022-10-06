@@ -1,5 +1,6 @@
 ﻿using Discord.WebSocket;
 using System.Net;
+using Tesseract;
 
 namespace SevenToWinBackend.Library.Services
 {
@@ -9,6 +10,7 @@ namespace SevenToWinBackend.Library.Services
     public class ImageService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        //private readonly IWebHostEnvironment env;
         private readonly List<string> _imageTypes = new List<string>()
         {
             "image/jpeg",
@@ -21,6 +23,7 @@ namespace SevenToWinBackend.Library.Services
         {
             _httpClientFactory = httpClientFactory;
         }
+
         /// <summary>
         /// 获取图片URL，若不存在则返回null
         /// </summary>
@@ -46,6 +49,31 @@ namespace SevenToWinBackend.Library.Services
             else
             {
                 return null;
+            }
+        }
+        /// <summary>
+        /// 将图片文件转换成文字
+        /// </summary>
+        public string? Ocr(FileInfo imageFile)
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "tessdata");
+            imageFile.OpenRead();
+            FileStream fs = imageFile.OpenRead();
+            var ms = new MemoryStream();
+            fs.CopyTo(ms);
+            fs.Close();
+            byte[] fileBytes = ms.ToArray();
+            ms.Close();
+            using (var engine = new TesseractEngine(path, "eng", EngineMode.Default))
+            {
+                using (var img = Pix.LoadFromMemory(fileBytes))
+                {
+                    using (var page = engine.Process(img))
+                    {
+                        var txt = page.GetText();
+                        return txt;
+                    }
+                }
             }
         }
     }
