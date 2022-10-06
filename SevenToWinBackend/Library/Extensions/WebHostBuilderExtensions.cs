@@ -15,8 +15,11 @@ namespace SevenToWinBackend.Library.Extensions
             builder.Services.AddSingleton<DiscordSettings>();
             builder.Services.AddSingleton<DiscordClient>();
             builder.Services.AddSingleton<CommandService>();
-            builder.Services.AddSingleton<BotService>();
-            builder.Services.AddHostedService(provider => provider.GetRequiredService<BotService>());
+            builder.Services.AddSingleton<DiscordService>();
+            builder.Services.AddSingleton<ImageService>();
+            builder.Services.AddSingleton<MessageService>();
+            builder.Services.AddSingleton<FileService>();
+            builder.Services.AddHostedService(provider => provider.GetRequiredService<DiscordService>());
             return builder;
         }
         /// <summary>

@@ -14,9 +14,9 @@ using System.Reflection;
 namespace SevenToWinBackend.Library.Services
 {
     /// <summary>
-    /// 机器人后台服务
+    /// Discord后台服务
     /// </summary>
-    public class BotService : IHostedService, IDisposable
+    public class DiscordService : IHostedService, IDisposable
     {
         private readonly DiscordClient _client;
         /// <summary>
@@ -25,15 +25,17 @@ namespace SevenToWinBackend.Library.Services
         private readonly CommandService _commandService;
         private readonly IServiceProvider _services;
         private readonly DiscordSettings _settings;
-        private readonly ILogger<BotService> _logger;
+        private readonly ILogger<DiscordService> _logger;
+        private readonly MessageService messageService;
 
-        public BotService(DiscordClient client, CommandService commandService, IServiceProvider services, DiscordSettings settings, ILogger<BotService> logger)
+        public DiscordService(DiscordClient client, CommandService commandService, IServiceProvider services, DiscordSettings settings, ILogger<DiscordService> logger, MessageService messageService)
         {
             _client = client;
             _commandService = commandService;
             _services = services;
             _settings = settings;
             _logger = logger;
+            this.messageService = messageService;
         }
 
         async Task IHostedService.StartAsync(CancellationToken cancellationToken)
@@ -73,21 +75,7 @@ namespace SevenToWinBackend.Library.Services
         /// </summary>
         private async Task _client_MessageReceived(SocketMessage arg)
         {
-            //_logger.LogInformation("Bot receives message!");
-            var message = arg as SocketUserMessage;
-            if(message == null)
-            {
-                return;
-            }
-            if (message.Author.IsBot)
-            {
-                return;
-            }
-            int argPos = 0;
-            if(message.HasStringPrefix("hi", ref argPos))
-            {
-                await message.ReplyAsync("hello");
-            }
+            await this.messageService.Handle(arg);
         }
         /// <summary>
         /// 当discord服务器数据下载完成时触发。
