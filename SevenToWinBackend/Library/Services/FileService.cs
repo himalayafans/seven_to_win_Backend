@@ -8,10 +8,12 @@ namespace SevenToWinBackend.Library.Services
     public class FileService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IWebHostEnvironment _env;
 
-        public FileService(IHttpClientFactory httpClientFactory)
+        public FileService(IHttpClientFactory httpClientFactory, IWebHostEnvironment env)
         {
             _httpClientFactory = httpClientFactory;
+            _env = env;
         }
 
         /// <summary>
@@ -21,11 +23,12 @@ namespace SevenToWinBackend.Library.Services
         /// <returns>返回临时文件的磁盘路径</returns>
         public async Task<FileInfo> DownloadFile(string url)
         {
+            var ext = Path.GetExtension(url);
             var httpClient = _httpClientFactory.CreateClient();
             var fileResponse = await httpClient.GetAsync(url);
-            byte[] bytes = await fileResponse.Content.ReadAsByteArrayAsync();
-            var filePath = Path.GetTempFileName();
-            using (var stream = File.Create(filePath))
+            var bytes = await fileResponse.Content.ReadAsByteArrayAsync();
+            var filePath = Path.Combine(_env.WebRootPath, "images", $"{Guid.NewGuid()}{ext}");
+            await using (var stream = File.Create(filePath))
             {
                 await stream.WriteAsync(bytes);
             }

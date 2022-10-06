@@ -10,7 +10,7 @@ namespace SevenToWinBackend.Library.Services
     public class ImageService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        //private readonly IWebHostEnvironment env;
+        private readonly IWebHostEnvironment _env;
         private readonly List<string> _imageTypes = new List<string>()
         {
             "image/jpeg",
@@ -19,10 +19,12 @@ namespace SevenToWinBackend.Library.Services
             "image/bmp"
         };
 
-        public ImageService(IHttpClientFactory httpClientFactory)
+        public ImageService(IHttpClientFactory httpClientFactory, IWebHostEnvironment env)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _env = env ?? throw new ArgumentNullException(nameof(env));
         }
+
 
         /// <summary>
         /// 获取图片URL，若不存在则返回null
@@ -56,6 +58,7 @@ namespace SevenToWinBackend.Library.Services
         /// </summary>
         public string? Ocr(FileInfo imageFile)
         {
+            var p = this._env.WebRootPath;
             var path = Path.Combine(AppContext.BaseDirectory, "tessdata");
             imageFile.OpenRead();
             FileStream fs = imageFile.OpenRead();

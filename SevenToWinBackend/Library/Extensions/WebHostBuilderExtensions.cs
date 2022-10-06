@@ -12,7 +12,7 @@ namespace SevenToWinBackend.Library.Extensions
     {
         public static WebApplicationBuilder AddDiscordBot(this WebApplicationBuilder builder)
         {
-            builder.Services.AddSingleton<DiscordSettings>();
+            builder.Services.AddSingleton<OptionSettings>();
             builder.Services.AddSingleton<DiscordClient>();
             builder.Services.AddSingleton<CommandService>();
             builder.Services.AddSingleton<DiscordService>();

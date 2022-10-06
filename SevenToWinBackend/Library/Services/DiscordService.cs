@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Commands;
-using Discord.Rest;
 using Discord.WebSocket;
 using SevenToWinBackend.Library.Core;
 using System.Reflection;
@@ -24,18 +23,18 @@ namespace SevenToWinBackend.Library.Services
         /// </summary>
         private readonly CommandService _commandService;
         private readonly IServiceProvider _services;
-        private readonly DiscordSettings _settings;
+        private readonly OptionSettings _settings;
         private readonly ILogger<DiscordService> _logger;
-        private readonly MessageService messageService;
+        private readonly MessageService _messageService;
 
-        public DiscordService(DiscordClient client, CommandService commandService, IServiceProvider services, DiscordSettings settings, ILogger<DiscordService> logger, MessageService messageService)
+        public DiscordService(DiscordClient client, CommandService commandService, IServiceProvider services, OptionSettings settings, ILogger<DiscordService> logger, MessageService messageService)
         {
             _client = client;
             _commandService = commandService;
             _services = services;
             _settings = settings;
             _logger = logger;
-            this.messageService = messageService;
+            _messageService = messageService;
         }
 
         async Task IHostedService.StartAsync(CancellationToken cancellationToken)
@@ -48,7 +47,7 @@ namespace SevenToWinBackend.Library.Services
             // 查找并加载程序集中所有继承自ModuleBase的命令类
             await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             // 使用配置文件中的token登录discord
-            await _client.LoginAsync(TokenType.Bot, _settings.Token);
+            await _client.LoginAsync(TokenType.Bot, _settings.DiscordToken);
             // 启动机器人
             await _client.StartAsync();
         }
@@ -75,7 +74,7 @@ namespace SevenToWinBackend.Library.Services
         /// </summary>
         private async Task _client_MessageReceived(SocketMessage arg)
         {
-            await this.messageService.Handle(arg);
+            await this._messageService.Handle(arg);
         }
         /// <summary>
         /// 当discord服务器数据下载完成时触发。
