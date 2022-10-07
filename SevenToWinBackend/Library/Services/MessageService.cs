@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using SevenToWinBackend.Library.Interfaces;
+using SevenToWinBackend.Library.Strategy;
 
 namespace SevenToWinBackend.Library.Services
 {
@@ -62,8 +63,10 @@ namespace SevenToWinBackend.Library.Services
                 return;
             }
             var file = await _fileService.DownloadFile(url);
-            await _ocrSpaceService.Parse(file);
-            await message.ReplyAsync("图片解析成功");
+            var ocrResponse =  await _ocrSpaceService.Parse(file);
+            var game = new SevenGame(ocrResponse, message);
+            var playResult = game.Play(); 
+            await message.ReplyAsync(playResult.ToString());
         }
     }
 }

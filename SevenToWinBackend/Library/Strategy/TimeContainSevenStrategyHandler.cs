@@ -1,0 +1,34 @@
+﻿namespace SevenToWinBackend.Library.Strategy;
+
+/// <summary>
+/// 时间包含7策略处理器
+/// </summary>
+public class TimeContainSevenStrategyHandler: BaseStrategyHandler
+{
+    /// <summary>
+    /// 是否满足时间规则
+    /// </summary>
+    private static bool IsEnabled(PlayResult result)
+    {
+        // Discord发帖的秒数
+        var second = result.SocketUserMessage.CreatedAt.Second;
+        // 获取秒的最后一位，例如 57 得到 7
+        var lastNum = second.ToString().Split().Last();
+        // 末尾字符必须是7
+        return lastNum == "7";
+    }
+    public override void Handle(PlayResult result)
+    {
+        // 如果该基本条件没满足，则短路，不调用后继者
+        if (!IsEnabled(result))
+        {
+            result.Tips.Add("截图时间的尾数不是7");
+            return;
+        };
+        const int score = 77;
+        result.TotalScore = result.TotalScore + score;
+        result.Tips.Add($"时间末尾带7，获得{score}个玉米");
+        // 调用后继者
+        Successor?.Handle(result);
+    }
+}
