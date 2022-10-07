@@ -35,20 +35,30 @@ public class PriceStrategyHandler : BaseStrategyHandler
                 titleLeft = line.Words.First().Left;
             }
 
-            if (titleLeft.HasValue && !price.HasValue && Math.Abs(titleLeft.Value - line.Words.First().Left) < 0.0005)
+            if (titleLeft.HasValue && !price.HasValue && Math.Abs(titleLeft.Value - line.Words.First().Left) < 0.0005 && line.LineText != "HCN/HDO")
             {
                 price = Convert.ToDouble(line.LineText);
             }
         }
-
-        var count = price?.ToString().ToCharArray().Count(p => p == '7');
-        // 如果价格包含7
-        if (count >= 1)
+        if (titleLeft == null)
         {
-            var score = GetScore(count.Value);
-            result.TotalScore = result.TotalScore + score;
-            result.Tips.Add($"价格包含{count}个7，获得{score}个玉米");
+            result.Tips.Add("截图没有包含HCN/HDO文字");
         }
-        this.Successor?.Handle(result);
+        else if (price == null)
+        {
+            result.Tips.Add("截图没有包含喜币价格");
+        }
+        else
+        {
+            var count = price?.ToString().ToCharArray().Count(p => p == '7');
+            // 如果价格包含7
+            if (count >= 1)
+            {
+                var score = GetScore(count.Value);
+                result.TotalScore = result.TotalScore + score;
+                result.Tips.Add($"价格包含{count}个7，获得{score}个玉米");
+            }
+            this.Successor?.Handle(result);
+        }
     }
 }
