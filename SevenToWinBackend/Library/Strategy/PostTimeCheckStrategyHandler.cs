@@ -14,20 +14,11 @@ public class PostTimeCheckStrategyHandler: BaseStrategyHandler
         var minute = result.SocketUserMessage.CreatedAt.Minute;
         // Discord发帖的秒数
         var second = result.SocketUserMessage.CreatedAt.Second;
-        var time1 = $"{minute}:{second}";
-        // 补充前导0， 例如 3:59 -> 03:59
-        var time2 = time1.PadLeft(5, '0');
-        foreach (var parsedResult in result.OcrResponse.ParsedResults)
-        {
-            foreach (var line in parsedResult.TextOverlay.Lines)
-            {
-                if (line.LineText == time1)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
+        // 补充前导0， 例如 1 -> 01
+        var minute2 = minute.ToString().PadLeft(2, '0');
+        var text = result.OcrResponse.ParsedResults.First().ParsedText;
+        // 只检查分钟，因为小时涉及到时区
+        return text.Contains($":{minute2}");
     }
     public override void Handle(PlayResult result)
     {

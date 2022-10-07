@@ -58,6 +58,10 @@ public class PriceStrategyHandler : BaseStrategyHandler
                 result.TotalScore = result.TotalScore + score;
                 result.Tips.Add($"价格包含{count}个7，获得{score}个玉米");
             }
+            else
+            {
+                result.Tips.Add($"喜币价格{price},没有包含7");
+            }
             this.Successor?.Handle(result);
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace SevenToWinBackend.Library.Strategy
+﻿using SevenToWinBackend.Library.Extensions;
+
+namespace SevenToWinBackend.Library.Strategy
 {
     /// <summary>
     /// LOGO检查策略
@@ -8,7 +10,7 @@
         public override void Handle(PlayResult result)
         {
             var text = result.OcrResponse.ParsedResults.First().ParsedText;
-            if(text.Contains("himalaya".ToUpper()) && text.Contains("exchange".ToUpper()))
+            if(text.ContainsIgnoreCase("himalaya") && text.ContainsIgnoreCase("exchange"))
             {
                 this.Successor?.Handle(result);
             }
