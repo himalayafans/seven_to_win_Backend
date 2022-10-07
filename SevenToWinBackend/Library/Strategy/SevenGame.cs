@@ -25,7 +25,7 @@ public class SevenGame
     public PlayResult Play()
     {
         var result = new PlayResult(OcrResponse, SocketUserMessage);
-        var h1 = new UrlStrategyHandler();
+        var h1 = new LogoStrategyHandler();
         var h2 = new PostTimeCheckStrategyHandler();
         h1.SetSuccessor(h2);
         var h3 = new TimeContainSevenStrategyHandler();
