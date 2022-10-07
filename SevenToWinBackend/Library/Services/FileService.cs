@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SevenToWinBackend.Library.Services
+﻿namespace SevenToWinBackend.Library.Services
 {
     /// <summary>
     /// 文件服务
@@ -28,10 +26,7 @@ namespace SevenToWinBackend.Library.Services
             var fileResponse = await httpClient.GetAsync(url);
             var bytes = await fileResponse.Content.ReadAsByteArrayAsync();
             var filePath = Path.Combine(_env.WebRootPath, "images", $"{Guid.NewGuid()}{ext}");
-            await using (var stream = File.Create(filePath))
-            {
-                await stream.WriteAsync(bytes);
-            }
+            await File.WriteAllBytesAsync(filePath, bytes);
             return new FileInfo(filePath);
         }
     }

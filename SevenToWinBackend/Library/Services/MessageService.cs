@@ -9,13 +9,37 @@ namespace SevenToWinBackend.Library.Services
     /// </summary>
     public class MessageService : IMessageService
     {
-        private readonly FileService fileService;
-        private readonly ImageService imageService;
-
-        public MessageService(FileService fileService, ImageService imageService)
+        private readonly FileService _fileService;
+        private readonly OcrSpaceService _ocrSpaceService;
+        private readonly List<string> _imageTypes = new List<string>()
         {
-            this.fileService = fileService;
-            this.imageService = imageService;
+            "image/jpeg",
+            "image/gif",
+            "image/png",
+            "image/bmp"
+        };
+
+        public MessageService(FileService fileService, OcrSpaceService ocrSpaceService)
+        {
+            this._fileService = fileService;
+            _ocrSpaceService = ocrSpaceService;
+        }
+        
+        /// <summary>
+        /// 获取消息中图片的URL，若不存在则返回null
+        /// </summary>
+        private string? GetImageUrl(SocketMessage message)
+        {
+            if (message.Attachments.Count == 0)
+            {
+                return null;
+            }
+            var file = message.Attachments.First();
+            if (file == null)
+            {
+                return null;
+            }
+            return _imageTypes.Contains(file.ContentType) ? file.Url : null;
         }
 
         public async Task Handle(SocketMessage arg)
@@ -31,15 +55,15 @@ namespace SevenToWinBackend.Library.Services
             {
                 return;
             }
-            var url = imageService.GetImageUrl(message);
-            if (String.IsNullOrWhiteSpace(url))
+            var url = GetImageUrl(message);
+            if (string.IsNullOrWhiteSpace(url))
             {
                 // 如果消息不包含图片，则忽略
                 return;
             }
-            FileInfo file = await fileService.DownloadFile(url);
-            var text = imageService.Ocr(file);
-            await message.ReplyAsync(file.FullName);
+            var file = await _fileService.DownloadFile(url);
+            await _ocrSpaceService.Parse(file);
+            await message.ReplyAsync("图片解析成功");
         }
     }
 }
