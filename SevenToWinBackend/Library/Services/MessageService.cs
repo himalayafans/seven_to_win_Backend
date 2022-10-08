@@ -25,7 +25,7 @@ namespace SevenToWinBackend.Library.Services
             this._fileService = fileService;
             _ocrSpaceService = ocrSpaceService;
         }
-        
+
         /// <summary>
         /// 获取消息中图片的URL，若不存在则返回null
         /// </summary>
@@ -63,10 +63,17 @@ namespace SevenToWinBackend.Library.Services
                 return;
             }
             var file = await _fileService.DownloadFile(url);
-            var ocrResponse =  await _ocrSpaceService.Parse(file);
-            var game = new SevenGame(ocrResponse, message);
-            var playResult = game.Play(); 
-            await message.ReplyAsync(playResult.ToString());
+            try
+            {
+                var ocrResponse = await _ocrSpaceService.Parse(file);
+                var game = new SevenGame(ocrResponse, message);
+                var playResult = game.Play();
+                await message.ReplyAsync(playResult.ToString());
+            }
+            catch (Exception ex)
+            {
+                await message.ReplyAsync(ex.Message);
+            }
         }
     }
 }

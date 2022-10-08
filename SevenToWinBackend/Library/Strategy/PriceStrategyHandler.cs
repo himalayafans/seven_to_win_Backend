@@ -35,7 +35,7 @@ public class PriceStrategyHandler : BaseStrategyHandler
                 titleLeft = line.Words.First().Left;
             }
 
-            if (titleLeft.HasValue && !price.HasValue && Math.Abs(titleLeft.Value - line.Words.First().Left) < 0.0005 && line.LineText != "HCN/HDO")
+            if (titleLeft.HasValue && !price.HasValue && Math.Abs(titleLeft.Value - line.Words.First().Left) < 5 && line.LineText != "HCN/HDO")
             {
                 price = Convert.ToDouble(line.LineText);
             }
@@ -56,7 +56,7 @@ public class PriceStrategyHandler : BaseStrategyHandler
             {
                 var score = GetScore(count.Value);
                 result.TotalScore = result.TotalScore + score;
-                result.Tips.Add($"价格包含{count}个7，获得{score}个玉米");
+                result.Tips.Add($"喜币价格{price}包含{count}个7，获得{score}个玉米");
             }
             else
             {

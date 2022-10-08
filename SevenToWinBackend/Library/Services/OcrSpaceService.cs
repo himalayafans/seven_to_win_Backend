@@ -45,7 +45,12 @@ namespace SevenToWinBackend.Library.Services
                 var res = await httpClient.PostAsync(Api, new FormUrlEncodedContent(data));
                 var jsonString = await res.Content.ReadAsStringAsync();
                 _logger.LogInformation($"Finish analyzing the image file {file.FullName}");
-                return JsonSerializer.Deserialize<OcrResponse>(jsonString)!;
+                var response = JsonSerializer.Deserialize<OcrResponse>(jsonString)!;
+                if (response.IsErroredOnProcessing)
+                {
+                    throw new Exception("图片识别错误：" + response.ErrorDetails);
+                }
+                return response;
             }
             catch (Exception e)
             {
