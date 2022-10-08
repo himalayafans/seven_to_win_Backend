@@ -50,7 +50,7 @@ public class PriceStrategyHandler : BaseStrategyHandler
         });
         if (titleLine == null || titleWord == null)
         {
-            result.Tips.Add("截图没有包含HCN/HDO文字");
+            result.AddMessage("截图没有包含HCN/HDO文字");
             return;
         }
 
@@ -71,7 +71,7 @@ public class PriceStrategyHandler : BaseStrategyHandler
         });
         if (priceLine == null || priceWord == null)
         {
-            result.Tips.Add("截图没有包含喜币价格");
+            result.AddMessage("截图没有包含喜币价格");
             return;
         }
         var price = Convert.ToDecimal(priceWord.WordText);
@@ -82,11 +82,11 @@ public class PriceStrategyHandler : BaseStrategyHandler
         {
             var score = GetScore(count);
             result.TotalScore = result.TotalScore + score;
-            result.Tips.Add($"喜币价格{price}包含{count}个7，获得{score}个玉米");
+            result.AddMessage($"喜币价格{price}包含{count}个7，获得{score}个玉米");
         }
         else
         {
-            result.Tips.Add($"喜币价格{price},没有包含7");
+            result.AddMessage($"喜币价格{price},没有包含7");
         }
 
         this.Successor?.Handle(result);

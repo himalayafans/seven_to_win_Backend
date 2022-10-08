@@ -34,7 +34,7 @@ namespace SevenToWinBackend.Library.Strategy
             }
             else
             {
-                result.Tips.Add("截图没有喜交所的LOGO或网址");
+                result.AddMessage("截图没有喜交所的LOGO或网址");
             }
         }
     }

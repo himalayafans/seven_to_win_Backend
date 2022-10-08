@@ -22,12 +22,12 @@ public class TimeContainSevenStrategyHandler: BaseStrategyHandler
         // 如果该基本条件没满足，则短路，不调用后继者
         if (!IsEnabled(result))
         {
-            result.Tips.Add("发帖时间的尾数不是7");
+            result.AddMessage("发帖时间的尾数不是7");
             return;
-        };
+        }
         const int score = 77;
         result.TotalScore = result.TotalScore + score;
-        result.Tips.Add($"发帖时间尾数是7，获得{score}个玉米");
+        result.AddMessage($"发帖时间尾数是7，获得{score}个玉米");
         // 调用后继者
         Successor?.Handle(result);
     }

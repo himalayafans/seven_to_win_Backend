@@ -27,7 +27,7 @@ public class PostTimeCheckStrategyHandler: BaseStrategyHandler
         }
         else
         {
-            result.Tips.Add("发帖时间与截图时间不一致");
+            result.AddMessage("发帖时间与截图时间不一致");
         }
     }
 }

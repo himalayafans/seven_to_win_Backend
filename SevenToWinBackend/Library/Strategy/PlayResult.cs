@@ -22,7 +22,7 @@ public class PlayResult
     /// <summary>
     /// 提示信息
     /// </summary>
-    public List<string> Tips { get; }
+    private StringBuilder Tips { get; }
 
     /// <summary>
     /// 获取的总分数
@@ -33,13 +33,28 @@ public class PlayResult
     {
         OcrResponse = ocrResponse ?? throw new ArgumentNullException(nameof(ocrResponse));
         SocketUserMessage = socketUserMessage ?? throw new ArgumentNullException(nameof(socketUserMessage));
-        Tips = new List<string>();
+        Tips = new StringBuilder();
         TotalScore = 0;
     }
 
+    /// <summary>
+    /// 增加消息
+    /// </summary>
+    public void AddMessage(string msg)
+    {
+        if (!string.IsNullOrWhiteSpace(msg))
+        {
+            this.Tips.AppendLine(msg.Trim());
+        }
+    }
+    
     public override string ToString()
     {
-        var msg = string.Join(';', Tips);
-        return $"本次获得玉米总数:{TotalScore}   {msg}";
+        var sb = new StringBuilder();
+        sb.AppendLine($"本次获得玉米总数:{TotalScore}");
+        sb.Append(Tips);
+        sb.Append("感谢您关注喜马拉雅交易所，用喜元、玩喜币、跟着喜支付一起飞……");
+        var result = sb.ToString();
+        return result;
     }
 }
