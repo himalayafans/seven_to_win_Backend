@@ -1,4 +1,8 @@
-﻿namespace SevenToWinBackend.Library.Strategy;
+﻿using System.Globalization;
+using SevenToWinBackend.Library.Extensions;
+using SevenToWinBackend.Library.Ocr;
+
+namespace SevenToWinBackend.Library.Strategy;
 
 /// <summary>
 /// 价格策略处理器
@@ -27,42 +31,64 @@ public class PriceStrategyHandler : BaseStrategyHandler
         var parsedResult = result.OcrResponse.ParsedResults.First();
         // 从截图中获取喜币价格，价格与HCN/HDO文字的左边距相同
         double? titleLeft = null;
-        double? price = null;
-        foreach (var line in parsedResult.TextOverlay.Lines)
+        Word? titleWord = null;
+        Word? priceWord = null;
+        var titleLine = parsedResult.TextOverlay.Lines.Find(line =>
         {
-            if (line.LineText == "HCN/HDO" && !titleLeft.HasValue)
+            return line.Words.Exists(item =>
             {
-                titleLeft = line.Words.First().Left;
-            }
+                var text = item.WordText;
+                // 考虑到最后一个O可能被识别为数字0，或无法识别的问题
+                var flag = text.StartsWith("HCN/HD") && text.Length is 6 or 7;
+                if (flag)
+                {
+                    titleWord = item;
+                }
 
-            if (titleLeft.HasValue && !price.HasValue && Math.Abs(titleLeft.Value - line.Words.First().Left) < 5 && line.LineText != "HCN/HDO")
-            {
-                price = Convert.ToDouble(line.LineText);
-            }
-        }
-        if (titleLeft == null)
+                return flag;
+            });
+        });
+        if (titleLine == null || titleWord == null)
         {
             result.Tips.Add("截图没有包含HCN/HDO文字");
+            return;
         }
-        else if (price == null)
+
+        var priceLine = parsedResult.TextOverlay.Lines.Find(line =>
+        {
+            var item = line.Words.Find(word =>
+            {
+                var text = word.WordText;
+                var flag = text.IsDecimal() && Math.Abs(titleWord.Left - word.Left) < 5;
+                if (flag)
+                {
+                    priceWord = word;
+                }
+
+                return flag;
+            });
+            return item != null;
+        });
+        if (priceLine == null || priceWord == null)
         {
             result.Tips.Add("截图没有包含喜币价格");
+            return;
+        }
+        var price = Convert.ToDecimal(priceWord.WordText);
+        var priceText = price.ToString(CultureInfo.CurrentCulture);
+        var count = priceText.ToCharArray().Count(p => p == '7');
+        // 如果价格包含7
+        if (count >= 1)
+        {
+            var score = GetScore(count);
+            result.TotalScore = result.TotalScore + score;
+            result.Tips.Add($"喜币价格{price}包含{count}个7，获得{score}个玉米");
         }
         else
         {
-            var count = price?.ToString().ToCharArray().Count(p => p == '7');
-            // 如果价格包含7
-            if (count >= 1)
-            {
-                var score = GetScore(count.Value);
-                result.TotalScore = result.TotalScore + score;
-                result.Tips.Add($"喜币价格{price}包含{count}个7，获得{score}个玉米");
-            }
-            else
-            {
-                result.Tips.Add($"喜币价格{price},没有包含7");
-            }
-            this.Successor?.Handle(result);
+            result.Tips.Add($"喜币价格{price},没有包含7");
         }
+
+        this.Successor?.Handle(result);
     }
 }

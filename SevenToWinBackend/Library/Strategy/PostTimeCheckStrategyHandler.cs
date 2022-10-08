@@ -12,8 +12,6 @@ public class PostTimeCheckStrategyHandler: BaseStrategyHandler
     {
         // Discord发帖的分钟
         var minute = result.SocketUserMessage.CreatedAt.Minute;
-        // Discord发帖的秒数
-        var second = result.SocketUserMessage.CreatedAt.Second;
         // 补充前导0， 例如 1 -> 01
         var minute2 = minute.ToString().PadLeft(2, '0');
         var text = result.OcrResponse.ParsedResults.First().ParsedText;
