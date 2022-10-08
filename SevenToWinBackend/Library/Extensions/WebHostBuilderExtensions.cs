@@ -3,7 +3,6 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Serilog;
-using SevenToWinBackend.Library.Core;
 using SevenToWinBackend.Library.Services;
 
 namespace SevenToWinBackend.Library.Extensions
@@ -13,7 +12,7 @@ namespace SevenToWinBackend.Library.Extensions
         public static WebApplicationBuilder AddDiscordBot(this WebApplicationBuilder builder)
         {
             builder.Services.AddSingleton<OptionSettings>();
-            builder.Services.AddSingleton<DiscordClient>();
+            builder.Services.AddSingleton<DiscordClientFactory>();
             builder.Services.AddSingleton<CommandService>();
             builder.Services.AddSingleton<DiscordService>();
             builder.Services.AddSingleton<MessageService>();

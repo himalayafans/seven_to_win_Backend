@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using SevenToWinBackend.Library.Core;
 using System.Reflection;
 
 /****************************************
@@ -17,7 +16,7 @@ namespace SevenToWinBackend.Library.Services
     /// </summary>
     public class DiscordService : IHostedService, IDisposable
     {
-        private readonly DiscordClient _client;
+        private readonly DiscordSocketClient _client;
         /// <summary>
         /// 该服务提供了一套框架，用于构建discord命令
         /// </summary>
@@ -27,9 +26,9 @@ namespace SevenToWinBackend.Library.Services
         private readonly ILogger<DiscordService> _logger;
         private readonly MessageService _messageService;
 
-        public DiscordService(DiscordClient client, CommandService commandService, IServiceProvider services, OptionSettings settings, ILogger<DiscordService> logger, MessageService messageService)
+        public DiscordService(DiscordClientFactory factory, CommandService commandService, IServiceProvider services, OptionSettings settings, ILogger<DiscordService> logger, MessageService messageService)
         {
-            _client = client;
+            _client = factory.Create();
             _commandService = commandService;
             _services = services;
             _settings = settings;
