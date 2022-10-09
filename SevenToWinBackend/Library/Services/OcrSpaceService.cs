@@ -45,10 +45,11 @@ namespace SevenToWinBackend.Library.Services
                 var res = await httpClient.PostAsync(Api, new FormUrlEncodedContent(data));
                 var jsonString = await res.Content.ReadAsStringAsync();
                 _logger.LogInformation($"Finish analyzing the image file {file.FullName}");
+                _logger.LogInformation(jsonString);
                 var response = JsonSerializer.Deserialize<OcrResponse>(jsonString)!;
-                if (response.IsErroredOnProcessing)
+                if (response.IsErroredOnProcessing && !string.IsNullOrWhiteSpace(response.ErrorDetails))
                 {
-                    throw new Exception("图片识别错误：" + response.ErrorDetails);
+                    throw new Exception("图片识别错误 " + response.ErrorDetails);
                 }
                 return response;
             }

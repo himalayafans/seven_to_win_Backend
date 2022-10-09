@@ -29,8 +29,6 @@ public class PriceStrategyHandler : BaseStrategyHandler
     public override void Handle(PlayResult result)
     {
         var parsedResult = result.OcrResponse.ParsedResults.First();
-        // 从截图中获取喜币价格，价格与HCN/HDO文字的左边距相同
-        double? titleLeft = null;
         Word? titleWord = null;
         Word? priceWord = null;
         var titleLine = parsedResult.TextOverlay.Lines.Find(line =>
@@ -38,8 +36,11 @@ public class PriceStrategyHandler : BaseStrategyHandler
             return line.Words.Exists(item =>
             {
                 var text = item.WordText;
+                // 识别“HCN/HDO”，共7个符号
                 // 考虑到最后一个O可能被识别为数字0，或无法识别的问题
-                var flag = text.StartsWith("HCN/HD") && text.Length is 6 or 7;
+                // 考虑/斜线识别问题
+                //var flag = text.StartsWith("HCN/HD") && text.Length is 6 or 7;
+                var flag = text.StartsWith("HCN") && text.Contains("HD") && text.Length <= 7;
                 if (flag)
                 {
                     titleWord = item;
@@ -82,6 +83,7 @@ public class PriceStrategyHandler : BaseStrategyHandler
         {
             var score = GetScore(count);
             result.TotalScore = result.TotalScore + score;
+            result.SevenTimes = count;
             result.AddMessage($"喜币价格{price}包含{count}个7，获得{score}个玉米");
         }
         else

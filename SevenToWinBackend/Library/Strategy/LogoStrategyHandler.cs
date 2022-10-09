@@ -9,22 +9,8 @@ namespace SevenToWinBackend.Library.Strategy
     {
         private bool IsEnabled(PlayResult result)
         {
-            foreach (var parsedResult in result.OcrResponse.ParsedResults)
-            {
-                foreach (var line in parsedResult.TextOverlay.Lines)
-                {
-                    foreach (var word in line.Words)
-                    {
-                        var text = word.WordText;
-                        if (text.ContainsIgnoreCase("himalaya") && text.ContainsIgnoreCase("exchange"))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
+            string text = result.OcrResponse.ParsedResults.First().ParsedText;
+            return text.ContainsIgnoreCase("himalaya") && text.ContainsIgnoreCase("exchange");
         }
         public override void Handle(PlayResult result)
         {

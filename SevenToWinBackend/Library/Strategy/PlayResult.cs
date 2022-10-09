@@ -29,6 +29,11 @@ public class PlayResult
     /// </summary>
     public int TotalScore { get; set; }
 
+    /// <summary>
+    /// 价格中7出现的次数
+    /// </summary>
+    public int SevenTimes { get; set; } = 0;
+
     public PlayResult(OcrResponse ocrResponse, SocketUserMessage socketUserMessage)
     {
         OcrResponse = ocrResponse ?? throw new ArgumentNullException(nameof(ocrResponse));
@@ -53,7 +58,21 @@ public class PlayResult
         var sb = new StringBuilder();
         sb.AppendLine($"本次获得玉米总数:{TotalScore}");
         sb.Append(Tips);
-        sb.Append("感谢您关注喜马拉雅交易所，用喜元、玩喜币、跟着喜支付一起飞……");
+        sb.AppendLine("您的玉米累计数请咨询管理员");
+        if (this.SevenTimes > 0)
+        {
+            //礼花字符串
+            var fire = new StringBuilder();
+            for (int i = 0; i < this.SevenTimes; i++)
+            {
+                fire.Append("🎉");
+            }
+            sb.Append($"感谢您关注喜马拉雅交易所，用喜元、玩喜币、跟着喜支付一起飞…… {fire.ToString()}");
+        }
+        else
+        {
+            sb.Append($"感谢您关注喜马拉雅交易所，用喜元、玩喜币、跟着喜支付一起飞……");           
+        }       
         var result = sb.ToString();
         return result;
     }

@@ -34,5 +34,11 @@ public class SevenGame
         h3.SetSuccessor(h4);
         h1.Handle(result);
         return result;
+
+        // 以下是测试代码
+        //var result = new PlayResult(OcrResponse, SocketUserMessage);
+        //var h = new PriceStrategyHandler();
+        //h.Handle(result);
+        //return result;
     }
 }
