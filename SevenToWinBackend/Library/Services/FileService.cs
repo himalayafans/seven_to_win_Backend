@@ -15,17 +15,28 @@
         }
 
         /// <summary>
-        /// 下载文件，并保存为临时文件
+        /// 下载文件，并保存为文件
         /// </summary>
         /// <param name="url">URL</param>
-        /// <returns>返回临时文件的磁盘路径</returns>
+        /// <returns>返回文件的磁盘路径</returns>
         public async Task<FileInfo> DownloadFile(string url)
         {
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new Exception("待下载的图片URL不能为空");
+            }
+
             var ext = Path.GetExtension(url);
             var httpClient = _httpClientFactory.CreateClient();
             var fileResponse = await httpClient.GetAsync(url);
             var bytes = await fileResponse.Content.ReadAsByteArrayAsync();
-            var filePath = Path.Combine(_env.WebRootPath, "images", $"{Guid.NewGuid()}{ext}");
+            var directoryPath = Path.Combine(_env.WebRootPath, "original");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            var directory = new DirectoryInfo(directoryPath);
+            var filePath = Path.Combine(directory.FullName, $"{Guid.NewGuid()}{ext}");
             await File.WriteAllBytesAsync(filePath, bytes);
             return new FileInfo(filePath);
         }

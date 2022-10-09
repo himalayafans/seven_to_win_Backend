@@ -36,9 +36,9 @@ public class SevenGame
         return result;
 
         // 以下是测试代码
-        //var result = new PlayResult(OcrResponse, SocketUserMessage);
-        //var h = new PriceStrategyHandler();
-        //h.Handle(result);
-        //return result;
+        // var result = new PlayResult(OcrResponse, SocketUserMessage);
+        // var h = new PriceStrategyHandler();
+        // h.Handle(result);
+        // return result;
     }
 }

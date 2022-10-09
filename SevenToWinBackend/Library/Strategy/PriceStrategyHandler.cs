@@ -40,12 +40,12 @@ public class PriceStrategyHandler : BaseStrategyHandler
                 // 考虑到最后一个O可能被识别为数字0，或无法识别的问题
                 // 考虑/斜线识别问题
                 //var flag = text.StartsWith("HCN/HD") && text.Length is 6 or 7;
-                var flag = text.StartsWith("HCN") && text.Contains("HD") && text.Length <= 7;
+                // 有时候被识别为HCN/HDOO
+                var flag = text.StartsWith("HCN") && text.Contains("HD") && text.Length <= 8;
                 if (flag)
                 {
                     titleWord = item;
                 }
-
                 return flag;
             });
         });

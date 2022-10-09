@@ -10,7 +10,9 @@ namespace SevenToWinBackend.Library.Strategy
         private bool IsEnabled(PlayResult result)
         {
             string text = result.OcrResponse.ParsedResults.First().ParsedText;
-            return text.ContainsIgnoreCase("himalaya") && text.ContainsIgnoreCase("exchange");
+            // 偶尔会被识别为 HIMALA AYA  EEXCHANGE
+            // return text.ContainsIgnoreCase("himalaya") && text.ContainsIgnoreCase("exchange");
+            return text.ContainsIgnoreCase("himala") && text.ContainsIgnoreCase("exchange");
         }
         public override void Handle(PlayResult result)
         {

@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using SevenToWinBackend.Library.Image;
 using SevenToWinBackend.Library.Interfaces;
 using SevenToWinBackend.Library.Strategy;
 
@@ -12,6 +13,7 @@ namespace SevenToWinBackend.Library.Services
     {
         private readonly FileService _fileService;
         private readonly OcrSpaceService _ocrSpaceService;
+        private readonly ImageService _imageService;
         private readonly List<string> _imageTypes = new List<string>()
         {
             "image/jpeg",
@@ -20,27 +22,29 @@ namespace SevenToWinBackend.Library.Services
             "image/bmp"
         };
 
-        public MessageService(FileService fileService, OcrSpaceService ocrSpaceService)
+        public MessageService(FileService fileService, OcrSpaceService ocrSpaceService, ImageService imageService)
         {
             this._fileService = fileService;
             _ocrSpaceService = ocrSpaceService;
+            _imageService = imageService;
         }
 
         /// <summary>
-        /// 获取消息中图片的URL，若不存在则返回null
+        /// 获取消息中的图片，若不存在则返回null
         /// </summary>
-        private string? GetImageUrl(SocketMessage message)
+        private ImageInfo? GetImage(SocketMessage message)
         {
-            if (message.Attachments.Count == 0)
+            var images = message.Attachments.Where(p => _imageTypes.Contains(p.ContentType)).ToList();
+            if (images.Count == 0)
             {
                 return null;
+            }
+            if (images.Count > 1)
+            {
+                throw new Exception("本次活动参与无效，一次只能上传一张图片");
             }
             var file = message.Attachments.First();
-            if (file == null)
-            {
-                return null;
-            }
-            return _imageTypes.Contains(file.ContentType) ? file.Url : null;
+            return new ImageInfo(file.Url, new ImageSize(file.Width.GetValueOrDefault(), file.Height.GetValueOrDefault()));
         }
 
         public async Task Handle(SocketMessage arg)
@@ -56,15 +60,15 @@ namespace SevenToWinBackend.Library.Services
             {
                 return;
             }
-            var url = GetImageUrl(message);
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                // 如果消息不包含图片，则忽略
-                return;
-            }
-            var file = await _fileService.DownloadFile(url);
             try
             {
+                var imageInfo = GetImage(message);
+                if(imageInfo == null)
+                {
+                    // 若消息中不包含图片，则忽略
+                    return;
+                }
+                var file = await _imageService.DownloadAndResize(imageInfo);
                 var ocrResponse = await _ocrSpaceService.Parse(file);
                 var game = new SevenGame(ocrResponse, message);
                 var playResult = game.Play();

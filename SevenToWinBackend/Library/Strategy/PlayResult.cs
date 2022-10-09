@@ -58,7 +58,7 @@ public class PlayResult
         var sb = new StringBuilder();
         sb.AppendLine($"本次获得玉米总数:{TotalScore}");
         sb.Append(Tips);
-        sb.AppendLine("您的玉米累计数请咨询管理员");
+        sb.AppendLine("您的玉米总数请咨询“出7致胜”管理员");
         if (this.SevenTimes > 0)
         {
             //礼花字符串
