@@ -47,9 +47,20 @@ namespace SevenToWinBackend.Library.Services
                 _logger.LogInformation($"Finish analyzing the image file {file.FullName}");
                 _logger.LogInformation(jsonString);
                 var response = JsonSerializer.Deserialize<OcrResponse>(jsonString)!;
-                if (response.IsErroredOnProcessing && !string.IsNullOrWhiteSpace(response.ErrorDetails))
+                if (response.IsErroredOnProcessing)
                 {
-                    throw new Exception("图片识别错误 " + response.ErrorDetails);
+                    if (string.IsNullOrWhiteSpace(response.ErrorDetails))
+                    {
+                        throw new Exception("图片识别错误:" + response.ErrorDetails);
+                    }
+                    else if(response.ErrorMessage?.Count > 0)
+                    {
+                        throw new Exception("图片识别错误:" + response.ErrorMessage.FirstOrDefault());
+                    }
+                    else
+                    {
+                        throw new Exception("图片识别错误:未知错误信息");
+                    }
                 }
                 return response;
             }

@@ -14,25 +14,27 @@ namespace SevenToWinBackend.Library.Services
         private readonly FileService _fileService;
         private readonly OcrSpaceService _ocrSpaceService;
         private readonly ImageService _imageService;
-        private readonly List<string> _imageTypes = new List<string>()
+        private readonly ILogger<MessageService> _logger;
+        private static readonly List<string> _imageTypes = new List<string>()
         {
             "image/jpeg",
-            "image/gif",
+            //"image/gif",
             "image/png",
-            "image/bmp"
+            //"image/bmp"
         };
 
-        public MessageService(FileService fileService, OcrSpaceService ocrSpaceService, ImageService imageService)
+        public MessageService(FileService fileService, OcrSpaceService ocrSpaceService, ImageService imageService, ILogger<MessageService> logger)
         {
             this._fileService = fileService;
             _ocrSpaceService = ocrSpaceService;
             _imageService = imageService;
+            this._logger = logger;
         }
 
         /// <summary>
         /// 获取消息中的图片，若不存在则返回null
         /// </summary>
-        private ImageInfo? GetImage(SocketMessage message)
+        private static ImageInfo? GetImage(SocketMessage message)
         {
             var images = message.Attachments.Where(p => _imageTypes.Contains(p.ContentType)).ToList();
             if (images.Count == 0)
@@ -46,18 +48,25 @@ namespace SevenToWinBackend.Library.Services
             var file = message.Attachments.First();
             return new ImageInfo(file.Url, new ImageSize(file.Width.GetValueOrDefault(), file.Height.GetValueOrDefault()));
         }
+        private void WriteLog(SocketMessage msg,string catalog)
+        {
+            _logger.LogInformation($"[{catalog}]，[作者]:{msg.Author.Username},[时间]:{msg.CreatedAt},[消息内容]:{msg.CleanContent}");
+        }
 
         public async Task Handle(SocketMessage arg)
         {
+            this.WriteLog(arg, "接收到消息");
             var message = arg as SocketUserMessage;
             // 若是系统消息，不是用户发的，则忽略
             if (message == null)
             {
+                this.WriteLog(arg, "忽略系统消息");
                 return;
             }
             // 如果消息是机器人发送，则忽略
             if (message.Author.IsBot)
             {
+                this.WriteLog(arg, "忽略机器人消息");
                 return;
             }
             try
@@ -65,6 +74,7 @@ namespace SevenToWinBackend.Library.Services
                 var imageInfo = GetImage(message);
                 if(imageInfo == null)
                 {
+                    this.WriteLog(arg, "忽略未包含图片消息");
                     // 若消息中不包含图片，则忽略
                     return;
                 }
@@ -76,6 +86,7 @@ namespace SevenToWinBackend.Library.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex,"异常");
                 await message.ReplyAsync(ex.Message);
             }
         }
