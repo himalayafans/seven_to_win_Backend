@@ -4,6 +4,7 @@
 
 using System.Text.Json;
 using SevenToWinBackend.Library.Ocr;
+using SevenToWinBackend.Library.Utils;
 
 namespace SevenToWinBackend.Library.Services
 {
@@ -17,11 +18,33 @@ namespace SevenToWinBackend.Library.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<OcrSpaceService> _logger;
 
-        public OcrSpaceService(OptionSettings option, IHttpClientFactory httpClientFactory, ILogger<OcrSpaceService> logger)
+        public OcrSpaceService(OptionSettings option, IHttpClientFactory httpClientFactory,
+            ILogger<OcrSpaceService> logger)
         {
             _option = option;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// 解析JSON，解析失败将抛出异常
+        /// </summary>
+        private OcrResponse TryParse(string json)
+        {
+            var responseWithError = JsonHelper.TryParse<OcrResponseWithError>(json);
+            if (responseWithError != null)
+            {
+                return responseWithError;
+            }
+
+            var response = JsonHelper.TryParse<OcrResponse>(json);
+            if (response == null)
+            {
+                _logger.LogError($"JSON解析错误：${json}");
+                throw new Exception("JSON解析失败");
+            }
+
+            return response;
         }
 
         public async Task<OcrResponse> Parse(FileInfo file)
@@ -46,22 +69,17 @@ namespace SevenToWinBackend.Library.Services
                 var jsonString = await res.Content.ReadAsStringAsync();
                 _logger.LogInformation($"Finish analyzing the image file {file.FullName}");
                 _logger.LogInformation(jsonString);
-                var response = JsonSerializer.Deserialize<OcrResponse>(jsonString)!;
+                var response = TryParse(jsonString);
                 if (response.IsErroredOnProcessing)
                 {
-                    if (string.IsNullOrWhiteSpace(response.ErrorDetails))
+                    var responseWithError = response as OcrResponseWithError;
+                    if (responseWithError != null && responseWithError.ErrorMessage.Count > 0)
                     {
-                        throw new Exception("图片识别错误:" + response.ErrorDetails);
+                        throw new Exception("图片识别错误："+responseWithError.ErrorMessage.First());
                     }
-                    else if(response.ErrorMessage?.Count > 0)
-                    {
-                        throw new Exception("图片识别错误:" + response.ErrorMessage.FirstOrDefault());
-                    }
-                    else
-                    {
-                        throw new Exception("图片识别错误:未知错误信息");
-                    }
+                    throw new Exception("图片识别错误：" + response.ErrorDetails);
                 }
+
                 return response;
             }
             catch (Exception e)

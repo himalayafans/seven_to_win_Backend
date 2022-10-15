@@ -5,6 +5,7 @@
 /// </summary>
 public class PostTimeCheckStrategyHandler: BaseStrategyHandler
 {
+
     /// <summary>
     /// 检查截图时间是否与Discord发帖时间一致（考虑到时区，只判断分和秒）
     /// </summary>

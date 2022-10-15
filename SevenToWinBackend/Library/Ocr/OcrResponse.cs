@@ -7,9 +7,5 @@ public class OcrResponse
     /// <summary>
     /// 错误详情(即便IsErroredOnProcessing=true时，有时也为空)
     /// </summary>
-    public string? ErrorDetails { get; set; }
-    /// <summary>
-    /// 错误信息(即便IsErroredOnProcessing=true时，有时也为空)
-    /// </summary>
-    public List<string>? ErrorMessage { get; set; }
+    public string ErrorDetails { get; set; } = string.Empty;
 }
